@@ -146,7 +146,7 @@
         btn.textContent = 'Continue to payment';
       }
     } catch (err) {
-      alert('Could not reach the booking server. Please try again.');
+      alert('Debug fetch error: ' + err.message);
       btn.disabled = false;
       btn.textContent = 'Continue to payment';
     }
