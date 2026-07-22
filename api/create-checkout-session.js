@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
       ],
       metadata: { date, time, duration: String(hours), name, email },
       success_url: `${SITE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${SITE_URL}/book.html`,
+      cancel_url: `${SITE_URL}/index.html`,
     });
 
     return res.status(200).json({ url: session.url });
