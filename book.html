@@ -141,7 +141,7 @@
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert('Something went wrong starting checkout. Please try again.');
+        alert('Debug info: ' + (data.debug || data.error || 'unknown error'));
         btn.disabled = false;
         btn.textContent = 'Continue to payment';
       }
