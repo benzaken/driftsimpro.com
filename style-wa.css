@@ -5,6 +5,7 @@
   --grey: #767671;
   --line: #E5E4DF;
   --red: #C8372C;
+  --green: #1E7A46;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -77,6 +78,18 @@ nav.on-video .nav-links a:not(.nav-book) { color: #FFFFFF; }
 .btn-block { width: 100%; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* Hero CTA gets extra pop since it sits on the dark video background */
+.hero .btn-primary {
+  background: var(--red);
+  color: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(200, 55, 44, 0.35);
+  letter-spacing: 0.3px;
+}
+.hero .btn-primary:hover {
+  background: #B22E24;
+  box-shadow: 0 10px 28px rgba(200, 55, 44, 0.45);
+}
+
 /* SECTIONS */
 .section { padding: 56px 0; border-top: 1px solid var(--line); position: relative; z-index: 2; background: var(--bg); }
 .section:first-of-type { border-top: none; }
@@ -134,10 +147,10 @@ nav.on-video .nav-links a:not(.nav-book) { color: #FFFFFF; }
 .summary-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 0.9rem; color: var(--grey); }
 .summary-row.total { border-bottom: none; color: var(--ink); font-size: 1.3rem; font-weight: 800; padding-top: 18px; }
 .lock-note {
-  margin-top: 18px; padding: 14px 16px; background: rgba(200,55,44,0.05);
-  border: 1px solid rgba(200,55,44,0.2); border-radius: 8px; font-size: 0.82rem; color: var(--grey);
+  margin-top: 18px; padding: 14px 16px; background: rgba(30,122,70,0.06);
+  border: 1px solid rgba(30,122,70,0.25); border-radius: 8px; font-size: 0.82rem; color: var(--grey);
 }
-.lock-note strong { color: var(--red); }
+.lock-note strong { color: var(--green); }
 
 /* FOOTER */
 footer { padding: 40px 0; position: relative; z-index: 2; background: var(--bg); }
