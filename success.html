@@ -63,7 +63,7 @@
 </footer>
 
 <script>
-  const BACKEND_URL = 'https://YOUR-BACKEND-URL.vercel.app';
+  const BACKEND_URL = 'https://driftsimpro-com.vercel.app';
 
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session_id');
@@ -72,12 +72,12 @@
   const title = document.getElementById('status-title');
   const body = document.getElementById('status-body');
   const card = document.getElementById('booking-card');
+  const lockNote = document.getElementById('lock-note');
 
-  if (!sessionId) {
-    eyebrow.textContent = 'Something went wrong';
-    title.textContent = 'No booking found';
-    body.textContent = 'We couldn\'t find a booking for this page. If you just paid, check your email for a confirmation, or contact us directly.';
-  } else {
+  let attempts = 0;
+  const MAX_ATTEMPTS = 10;
+
+  function checkBooking() {
     fetch(`${BACKEND_URL}/api/get-booking?session_id=${encodeURIComponent(sessionId)}`)
       .then(r => r.json())
       .then(data => {
@@ -96,12 +96,30 @@
         document.getElementById('out-time').textContent = data.time;
         document.getElementById('out-duration').textContent = data.duration + ' hr';
         card.style.display = 'block';
+
+        if (data.code) {
+          lockNote.innerHTML = `<strong>Your door code:</strong> ${data.code}<br>Valid only during your booked session time.`;
+        } else if (attempts < MAX_ATTEMPTS) {
+          attempts += 1;
+          lockNote.textContent = 'Generating your door code…';
+          setTimeout(checkBooking, 2000);
+        } else {
+          lockNote.textContent = 'Your door code is taking longer than usual. Check your email shortly, or contact us.';
+        }
       })
       .catch(() => {
         eyebrow.textContent = 'Something went wrong';
         title.textContent = 'Couldn\'t load your booking';
         body.textContent = 'Refresh this page, or contact us if the issue continues.';
       });
+  }
+
+  if (!sessionId) {
+    eyebrow.textContent = 'Something went wrong';
+    title.textContent = 'No booking found';
+    body.textContent = 'We couldn\'t find a booking for this page. If you just paid, check your email for a confirmation, or contact us directly.';
+  } else {
+    checkBooking();
   }
 </script>
 
