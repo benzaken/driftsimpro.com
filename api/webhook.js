@@ -27,7 +27,14 @@ async function createLockCode(session) {
   const hours = parseInt(duration, 10);
 
   const startsAt = DateTime.fromISO(`${date}T${time}`, { zone: VENUE_TIMEZONE });
-  const endsAt = startsAt.plus({ hours });
+
+  // TEST_SHORT_CODES=true in Vercel env vars makes every code expire in
+  // 3 minutes instead of the real booked duration, so you don't have to
+  // wait a full session length to test expiry. Remove/set to false for
+  // real customer bookings.
+  const endsAt = process.env.TEST_SHORT_CODES === 'true'
+    ? startsAt.plus({ minutes: 3 })
+    : startsAt.plus({ hours });
 
   const codeName = `SD-${session.id.slice(-12)}`;
 
