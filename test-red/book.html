@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Session | Sim Drift</title>
+<link rel="stylesheet" href="style-red.css">
+</head>
+<body>
+<div class="checker-strip"></div>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <button class="menu-toggle" aria-label="Toggle menu" onclick="document.getElementById('nav-links').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="rules.html">Rules</a>
+      <a href="faq.html">FAQ</a>
+      <a href="book.html" class="nav-book current">Book now</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" style="padding: 60px 0 40px;">
+  <div class="hero-smoke"></div>
+  <div class="container hero-content">
+    <div class="eyebrow">Book your own session</div>
+    <h1 style="font-size: clamp(1.8rem, 5vw, 3rem);">Reserve your time on the rig</h1>
+    <p class="lead">Pick a date, time, and duration. You'll get everything you need to walk in and drive at your booked time — no one else involved.</p>
+  </div>
+</section>
+
+<section class="section" style="border-bottom: none; padding-top: 56px;">
+  <div class="container">
+    <div class="booking-panel">
+
+      <div class="form-card">
+        <div class="field">
+          <label for="date">Date</label>
+          <input type="date" id="date">
+        </div>
+        <div class="field">
+          <label for="time">Start time</label>
+          <input type="time" id="time">
+        </div>
+        <div class="field">
+          <label>Duration</label>
+          <div class="duration-options">
+            <div class="duration-opt" data-hours="1">1 hr</div>
+            <div class="duration-opt selected" data-hours="2">2 hr</div>
+            <div class="duration-opt" data-hours="3">3 hr</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="name">Name</label>
+          <input type="text" id="name" placeholder="Your name">
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@email.com">
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-row">
+          <span>Rate</span>
+          <span>$35 / hr</span>
+        </div>
+        <div class="summary-row">
+          <span>Duration</span>
+          <span id="summary-duration">2 hr</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="summary-total">$70</span>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top: 24px;" id="pay-btn">Continue to payment</button>
+
+        <div class="lock-note">
+          <strong>Coming soon:</strong> automatic door access. Once payment is live, every booking will generate a temporary smart-lock code that works only during your reserved hour — so you can let yourself in without ever needing staff on site.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <div class="foot-note">&copy; 2026 Sim Drift.</div>
+  </div>
+</footer>
+
+<script>
+  const rate = 35;
+  const opts = document.querySelectorAll('.duration-opt');
+  const summaryDuration = document.getElementById('summary-duration');
+  const summaryTotal = document.getElementById('summary-total');
+
+  opts.forEach(opt => {
+    opt.addEventListener('click', () => {
+      opts.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      const hours = parseInt(opt.dataset.hours, 10);
+      summaryDuration.textContent = hours + ' hr';
+      summaryTotal.textContent = '$' + (hours * rate);
+    });
+  });
+
+  document.getElementById('pay-btn').addEventListener('click', () => {
+    alert('Payment isn\'t connected yet. Once a payment provider (like Stripe) is wired up, this button will take customers to checkout.');
+  });
+</script>
+
+</body>
+</html>
