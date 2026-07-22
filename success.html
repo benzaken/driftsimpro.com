@@ -4,60 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Booking Confirmed | Sim Drift</title>
-<link rel="stylesheet" href="style-green.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style-wa.css">
 </head>
 <body>
-<div class="checker-strip"></div>
 
 <nav>
-  <div class="container nav-inner">
-    <div class="brand">SIM <span>DRIFT</span></div>
-    <button class="menu-toggle" aria-label="Toggle menu" onclick="document.getElementById('nav-links').classList.toggle('open')">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="links" id="nav-links">
-      <a href="index.html">Home</a>
+  <div class="wrap">
+    <a href="index.html" class="brand">SIM DRIFT</a>
+    <div class="nav-links">
       <a href="rules.html">Rules</a>
       <a href="faq.html">FAQ</a>
-      <a href="book.html" class="nav-book">Book now</a>
+      <a href="book.html" class="nav-book">Book Now</a>
     </div>
   </div>
 </nav>
 
-<section class="hero" style="padding: 60px 0 40px;">
-  <div class="hero-smoke"></div>
-  <div class="container hero-content">
+<section class="page-hero">
+  <div class="wrap">
     <div class="eyebrow" id="status-eyebrow">Checking your payment…</div>
-    <h1 style="font-size: clamp(1.8rem, 5vw, 3rem);" id="status-title">One moment</h1>
+    <h1 id="status-title">One moment</h1>
     <p class="lead" id="status-body">We're confirming your booking. This only takes a second.</p>
   </div>
 </section>
 
-<section class="section" style="border-bottom: none;">
-  <div class="container">
+<section class="section" style="border-top: none;">
+  <div class="wrap">
     <div class="summary-card" id="booking-card" style="display: none; max-width: 480px;">
-      <div class="summary-row">
-        <span>Date</span>
-        <span id="out-date">—</span>
-      </div>
-      <div class="summary-row">
-        <span>Time</span>
-        <span id="out-time">—</span>
-      </div>
-      <div class="summary-row">
-        <span>Duration</span>
-        <span id="out-duration">—</span>
-      </div>
-      <div class="lock-note" id="lock-note" style="margin-top: 20px;">
-        Your door code will appear here once it's ready.
-      </div>
+      <div class="summary-row"><span>Date</span><span id="out-date">—</span></div>
+      <div class="summary-row"><span>Time</span><span id="out-time">—</span></div>
+      <div class="summary-row"><span>Duration</span><span id="out-duration">—</span></div>
+      <div class="lock-note" id="lock-note" style="margin-top: 20px;">Your door code will appear here once it's ready.</div>
     </div>
   </div>
 </section>
 
 <footer>
-  <div class="container">
-    <div class="brand">SIM <span>DRIFT</span></div>
+  <div class="wrap">
+    <div class="brand">SIM DRIFT</div>
     <div class="foot-note">&copy; 2026 Sim Drift.</div>
   </div>
 </footer>

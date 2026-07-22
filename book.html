@@ -4,37 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Book a Session | Sim Drift</title>
-<link rel="stylesheet" href="style-green.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style-wa.css">
 </head>
 <body>
-<div class="checker-strip"></div>
 
 <nav>
-  <div class="container nav-inner">
-    <div class="brand">SIM <span>DRIFT</span></div>
-    <button class="menu-toggle" aria-label="Toggle menu" onclick="document.getElementById('nav-links').classList.toggle('open')">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="links" id="nav-links">
-      <a href="index.html">Home</a>
+  <div class="wrap">
+    <a href="index.html" class="brand">SIM DRIFT</a>
+    <div class="nav-links">
       <a href="rules.html">Rules</a>
       <a href="faq.html">FAQ</a>
-      <a href="book.html" class="nav-book current">Book now</a>
+      <a href="book.html" class="nav-book">Book Now</a>
     </div>
   </div>
 </nav>
 
-<section class="hero" style="padding: 60px 0 40px;">
-  <div class="hero-smoke"></div>
-  <div class="container hero-content">
+<section class="page-hero">
+  <div class="wrap">
     <div class="eyebrow">Book your own session</div>
-    <h1 style="font-size: clamp(1.8rem, 5vw, 3rem);">Reserve your time on the rig</h1>
+    <h1>Reserve your time on the rig</h1>
     <p class="lead">Pick a date, time, and duration. You'll get everything you need to walk in and drive at your booked time — no one else involved.</p>
   </div>
 </section>
 
-<section class="section" style="border-bottom: none; padding-top: 56px;">
-  <div class="container">
+<section class="section" style="border-top: none;">
+  <div class="wrap">
     <div class="booking-panel">
 
       <div class="form-card">
@@ -65,22 +61,12 @@
       </div>
 
       <div class="summary-card">
-        <div class="summary-row">
-          <span>Rate</span>
-          <span>$35 / hr</span>
-        </div>
-        <div class="summary-row">
-          <span>Duration</span>
-          <span id="summary-duration">2 hr</span>
-        </div>
-        <div class="summary-row total">
-          <span>Total</span>
-          <span id="summary-total">$70</span>
-        </div>
-        <button class="btn btn-primary btn-block" style="margin-top: 24px;" id="pay-btn">Continue to payment</button>
-
+        <div class="summary-row"><span>Rate</span><span>$35 / hr</span></div>
+        <div class="summary-row"><span>Duration</span><span id="summary-duration">2 hr</span></div>
+        <div class="summary-row total"><span>Total</span><span id="summary-total">$70</span></div>
+        <button class="btn btn-primary btn-block" style="margin-top: 20px;" id="pay-btn">Continue to payment</button>
         <div class="lock-note">
-          <strong>Coming soon:</strong> automatic door access. Once payment is live, every booking will generate a temporary smart-lock code that works only during your reserved hour — so you can let yourself in without ever needing staff on site.
+          <strong>Automatic access:</strong> once payment is confirmed, you'll get a temporary door code that works only during your reserved hour.
         </div>
       </div>
 
@@ -89,8 +75,8 @@
 </section>
 
 <footer>
-  <div class="container">
-    <div class="brand">SIM <span>DRIFT</span></div>
+  <div class="wrap">
+    <div class="brand">SIM DRIFT</div>
     <div class="foot-note">&copy; 2026 Sim Drift.</div>
   </div>
 </footer>
@@ -141,12 +127,12 @@
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert('Debug info: ' + (data.debug || data.error || 'unknown error'));
+        alert('Something went wrong starting checkout. Please try again.');
         btn.disabled = false;
         btn.textContent = 'Continue to payment';
       }
     } catch (err) {
-      alert('Debug fetch error: ' + err.message);
+      alert('Could not reach the booking server. Please try again.');
       btn.disabled = false;
       btn.textContent = 'Continue to payment';
     }
