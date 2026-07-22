@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sim Drift | Self-Service Sim Racing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style-wa.css">
+</head>
+<body>
+
+<video class="bg-video" id="bgVideo" autoplay muted loop playsinline webkit-playsinline="true" preload="auto">
+  <source src="showcase.mp4" type="video/mp4">
+</video>
+<div class="bg-scrim" id="bgScrim"></div>
+<div class="bg-fade-solid" id="bgFadeSolid"></div>
+
+<nav class="on-video">
+  <div class="wrap">
+    <div class="brand">SIM DRIFT</div>
+    <div class="nav-links">
+      <a href="rules.html">Rules</a>
+      <a href="faq.html">FAQ</a>
+      <a href="book.html" class="nav-book">Book Now</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap" style="display: flex; gap: 44px; align-items: flex-start;">
+    <div class="jp-mark">
+      <div class="jp-circle"></div>
+      <div class="jp-vertical">ドリフト</div>
+    </div>
+    <div class="hero-text">
+      <div class="eyebrow">Self-Service · Open Now</div>
+      <h1>Book your own <span class="red">drift.</span></h1>
+      <a href="book.html" class="btn btn-primary" style="margin-bottom: 24px;">Book a Session</a>
+      <p class="lead" style="margin-bottom: 0;">Reserve your time on the rig, walk in, and drive. No staff, no waiting — just precision, on your schedule.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-label">How it works</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><h3>Book</h3><p>Pick a date, time, and duration.</p></div>
+      <div class="step"><div class="step-num">02</div><h3>Arrive</h3><p>Access unlocks at your slot.</p></div>
+      <div class="step"><div class="step-num">03</div><h3>Drive</h3><p>Full rig, ready to go.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-label">Pricing</div>
+    <div class="price-panel">
+      <div class="price-num">$35<span> / hr</span></div>
+      <div class="price-desc">Billed by the minute. No memberships.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="brand">SIM DRIFT</div>
+    <div class="foot-note">&copy; 2026 Sim Drift.</div>
+  </div>
+</footer>
+
+<script>
+  const video = document.getElementById('bgVideo');
+  video.muted = true;
+  const playAttempt = video.play();
+  if (playAttempt !== undefined) {
+    playAttempt.catch(() => {
+      // If the browser still blocks autoplay, try again on first touch/scroll
+      const retry = () => { video.play(); document.removeEventListener('touchstart', retry); };
+      document.addEventListener('touchstart', retry, { once: true });
+    });
+  }
+
+  const fadeSolid = document.getElementById('bgFadeSolid');
+  const fadeDistance = window.innerHeight * 0.9;
+  function updateFade() {
+    const progress = Math.min(window.scrollY / fadeDistance, 1);
+    fadeSolid.style.opacity = progress;
+  }
+  window.addEventListener('scroll', updateFade, { passive: true });
+  updateFade();
+</script>
+
+</body>
+</html>
