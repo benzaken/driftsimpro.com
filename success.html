@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking Confirmed | Sim Drift</title>
+<link rel="stylesheet" href="style-green.css">
+</head>
+<body>
+<div class="checker-strip"></div>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <button class="menu-toggle" aria-label="Toggle menu" onclick="document.getElementById('nav-links').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="rules.html">Rules</a>
+      <a href="faq.html">FAQ</a>
+      <a href="book.html" class="nav-book">Book now</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" style="padding: 60px 0 40px;">
+  <div class="hero-smoke"></div>
+  <div class="container hero-content">
+    <div class="eyebrow" id="status-eyebrow">Checking your payment…</div>
+    <h1 style="font-size: clamp(1.8rem, 5vw, 3rem);" id="status-title">One moment</h1>
+    <p class="lead" id="status-body">We're confirming your booking. This only takes a second.</p>
+  </div>
+</section>
+
+<section class="section" style="border-bottom: none;">
+  <div class="container">
+    <div class="summary-card" id="booking-card" style="display: none; max-width: 480px;">
+      <div class="summary-row">
+        <span>Date</span>
+        <span id="out-date">—</span>
+      </div>
+      <div class="summary-row">
+        <span>Time</span>
+        <span id="out-time">—</span>
+      </div>
+      <div class="summary-row">
+        <span>Duration</span>
+        <span id="out-duration">—</span>
+      </div>
+      <div class="lock-note" id="lock-note" style="margin-top: 20px;">
+        Your door code will appear here once it's ready.
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <div class="foot-note">&copy; 2026 Sim Drift.</div>
+  </div>
+</footer>
+
+<script>
+  const BACKEND_URL = 'https://YOUR-BACKEND-URL.vercel.app';
+
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+
+  const eyebrow = document.getElementById('status-eyebrow');
+  const title = document.getElementById('status-title');
+  const body = document.getElementById('status-body');
+  const card = document.getElementById('booking-card');
+
+  if (!sessionId) {
+    eyebrow.textContent = 'Something went wrong';
+    title.textContent = 'No booking found';
+    body.textContent = 'We couldn\'t find a booking for this page. If you just paid, check your email for a confirmation, or contact us directly.';
+  } else {
+    fetch(`${BACKEND_URL}/api/get-booking?session_id=${encodeURIComponent(sessionId)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status !== 'paid') {
+          eyebrow.textContent = 'Payment not confirmed';
+          title.textContent = 'We couldn\'t confirm this payment';
+          body.textContent = 'If you were charged, contact us and we\'ll sort it out.';
+          return;
+        }
+
+        eyebrow.textContent = 'You\'re booked';
+        title.textContent = 'See you on the rig';
+        body.textContent = 'Here\'s your session summary.';
+
+        document.getElementById('out-date').textContent = data.date;
+        document.getElementById('out-time').textContent = data.time;
+        document.getElementById('out-duration').textContent = data.duration + ' hr';
+        card.style.display = 'block';
+      })
+      .catch(() => {
+        eyebrow.textContent = 'Something went wrong';
+        title.textContent = 'Couldn\'t load your booking';
+        body.textContent = 'Refresh this page, or contact us if the issue continues.';
+      });
+  }
+</script>
+
+</body>
+</html>
