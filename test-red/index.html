@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Session | Sim Drift</title>
+<link rel="stylesheet" href="style-red.css">
+</head>
+<body>
+<div class="checker-strip"></div>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <button class="menu-toggle" aria-label="Toggle menu" onclick="document.getElementById('nav-links').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="rules.html">Rules</a>
+      <a href="faq.html">FAQ</a>
+      <a href="book.html" class="nav-book current">Book now</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" style="padding: 60px 0 40px;">
+  <div class="hero-smoke"></div>
+  <div class="container hero-content">
+    <div class="eyebrow">Book your own session</div>
+    <h1 style="font-size: clamp(1.8rem, 5vw, 3rem);">Reserve your time on the rig</h1>
+    <p class="lead">Pick a date, time, and duration. You'll get everything you need to walk in and drive at your booked time — no one else involved.</p>
+  </div>
+</section>
+
+<section class="section" style="border-bottom: none; padding-top: 56px;">
+  <div class="container">
+    <div class="booking-panel">
+
+      <div class="form-card">
+        <div class="field">
+          <label for="date">Date</label>
+          <input type="date" id="date">
+        </div>
+        <div class="field">
+          <label for="time">Start time</label>
+          <input type="time" id="time">
+        </div>
+        <div class="field">
+          <label>Duration</label>
+          <div class="duration-options">
+            <div class="duration-opt" data-hours="1">1 hr</div>
+            <div class="duration-opt selected" data-hours="2">2 hr</div>
+            <div class="duration-opt" data-hours="3">3 hr</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="name">Name</label>
+          <input type="text" id="name" placeholder="Your name">
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@email.com">
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-row">
+          <span>Rate</span>
+          <span>$35 / hr</span>
+        </div>
+        <div class="summary-row">
+          <span>Duration</span>
+          <span id="summary-duration">2 hr</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="summary-total">$70</span>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top: 24px;" id="pay-btn">Continue to payment</button>
+
+        <div class="lock-note">
+          <strong>Coming soon:</strong> automatic door access. Once payment is live, every booking will generate a temporary smart-lock code that works only during your reserved hour — so you can let yourself in without ever needing staff on site.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <div class="foot-note">&copy; 2026 Sim Drift.</div>
+  </div>
+</footer>
+
+<script>
+  const rate = 35;
+  const opts = document.querySelectorAll('.duration-opt');
+  const summaryDuration = document.getElementById('summary-duration');
+  const summaryTotal = document.getElementById('summary-total');
+
+  opts.forEach(opt => {
+    opt.addEventListener('click', () => {
+      opts.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      const hours = parseInt(opt.dataset.hours, 10);
+      summaryDuration.textContent = hours + ' hr';
+      summaryTotal.textContent = '$' + (hours * rate);
+    });
+  });
+
+  document.getElementById('pay-btn').addEventListener('click', () => {
+    alert('Payment isn\'t connected yet. Once a payment provider (like Stripe) is wired up, this button will take customers to checkout.');
+  });
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ | Sim Drift</title>
+<link rel="stylesheet" href="style-red.css">
+</head>
+<body>
+<div class="checker-strip"></div>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <button class="menu-toggle" aria-label="Toggle menu" onclick="document.getElementById('nav-links').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="rules.html">Rules</a>
+      <a href="faq.html" class="current">FAQ</a>
+      <a href="book.html" class="nav-book">Book now</a>
+    </div>
+  </div>
+</nav>
+<a href="book.html" class="fab-book">Book now</a>
+
+<section class="hero" style="padding: 60px 0 40px;">
+  <div class="hero-smoke"></div>
+  <div class="container hero-content">
+    <div class="eyebrow">Common questions</div>
+    <h1 style="font-size: clamp(1.8rem, 5vw, 3rem);">FAQ</h1>
+    <p class="lead">Answers to the questions we hear most. Don't see yours here — reach out and ask.</p>
+  </div>
+</section>
+
+<section class="section" style="border-bottom: none;">
+  <div class="container">
+
+    <div class="faq-item">
+      <h3>Do I need to book in advance?</h3>
+      <p>Yes — since there's no staff on-site, booking online guarantees the room is yours at that time and that you'll have everything you need to get in.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>How does "self-service" actually work?</h3>
+      <p>You book and pay for your slot online. At your reserved time, you're able to walk in and start driving right away — no check-in desk, no one to wait on.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Do I need racing experience?</h3>
+      <p>Not at all. The rig works for total beginners and experienced drifters alike. [Add any specific onboarding/tutorial info here]</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>What if I need more time once I'm there?</h3>
+      <p>If the following slot is open, you'll be able to extend directly through the booking page. [Confirm this is how you want extensions to work]</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>What's your cancellation policy?</h3>
+      <p>[Add your cancellation/refund window here — e.g. free cancellation up to 24 hours before your session]</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Is there an age requirement?</h3>
+      <p>See the <a href="rules.html" style="text-decoration: underline;">Rules page</a> for our current age policy.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Where are you located?</h3>
+      <p>[Address to be added once finalized]</p>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <div class="foot-note">&copy; 2026 Sim Drift.</div>
+  </div>
+</footer>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sim Drift | Self-Service Sim Racing</title>
+<link rel="stylesheet" href="style-red.css">
+</head>
+<body>
+<div class="checker-strip"></div>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <button class="menu-toggle" aria-label="Toggle menu" onclick="document.getElementById('nav-links').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="links" id="nav-links">
+      <a href="index.html" class="current">Home</a>
+      <a href="rules.html">Rules</a>
+      <a href="faq.html">FAQ</a>
+      <a href="book.html" class="nav-book">Book now</a>
+    </div>
+  </div>
+</nav>
+<a href="book.html" class="fab-book">Book now</a>
+
+<section class="hero">
+  <div class="hero-smoke"></div>
+  <div class="container hero-content">
+    <div class="eyebrow">Self-service · Book yourself, anytime</div>
+    <h1>No staff.<br>No wait.<br><span class="accent-text">Just book & drive.</span></h1>
+    <p class="lead">Sim Drift is a self-service drift racing room. Book your own session online, show up, and get straight behind the wheel — no front desk, no waiting on anyone.</p>
+    <div class="hero-ctas">
+      <a href="book.html" class="btn btn-primary cta-glow">Book a session</a>
+      <a href="#how" class="btn btn-ghost">How it works</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-label">The whole point</div>
+    <h2>You book it. You run it.</h2>
+    <p class="section-sub">The entire experience is built around one idea: you shouldn't need staff to drive. Reserve your own time slot, unlock the room yourself, and drive on your schedule.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Book online</h3>
+        <p>Pick your date, time, and duration on the booking page. Pay in advance — no calls, no waiting for a reply.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Get your access</h3>
+        <p>Your confirmation includes everything you need to get into the room at your booked time.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Drive</h3>
+        <p>Full force-feedback wheel, pedals, and seat, ready to go the moment you sit down.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Leave whenever</h3>
+        <p>Your session ends automatically at your booked time. No checkout, nobody waiting on you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <h2>Simple, honest pricing</h2>
+    <p class="section-sub">One rate. Book exactly the time you want.</p>
+
+    <div class="pricing-card">
+      <div class="pricing-rate">$35<span>/ hour</span></div>
+      <div class="pricing-desc">
+        <strong>Book by the hour</strong>
+        Choose your session length when you book. No memberships, no packages to figure out.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-label">The room</div>
+    <h2>What's inside</h2>
+    <div class="placeholder-img" style="margin-top: 40px;">Photo coming soon</div>
+  </div>
+</section>
+
+<section class="section" style="border-bottom: none;">
+  <div class="container" style="text-align: center;">
+    <h2 style="max-width: none;">Ready to drive?</h2>
+    <p class="section-sub" style="margin: 14px auto 32px; text-align: center;">Booking takes less than a minute.</p>
+    <a href="book.html" class="btn btn-primary cta-glow">Book a session</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <div class="foot-note">&copy; 2026 Sim Drift.</div>
+  </div>
+</footer>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rules | Sim Drift</title>
+<link rel="stylesheet" href="style-red.css">
+</head>
+<body>
+<div class="checker-strip"></div>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <button class="menu-toggle" aria-label="Toggle menu" onclick="document.getElementById('nav-links').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="rules.html" class="current">Rules</a>
+      <a href="faq.html">FAQ</a>
+      <a href="book.html" class="nav-book">Book now</a>
+    </div>
+  </div>
+</nav>
+<a href="book.html" class="fab-book">Book now</a>
+
+<section class="hero" style="padding: 60px 0 40px;">
+  <div class="hero-smoke"></div>
+  <div class="container hero-content">
+    <div class="eyebrow">Please read before your session</div>
+    <h1 style="font-size: clamp(1.8rem, 5vw, 3rem);">Rules & requirements</h1>
+    <p class="lead">Since this is a self-service space, we all rely on each other to keep it running well. A few ground rules keep the rig in good shape for the next driver.</p>
+  </div>
+</section>
+
+<section class="section" style="border-bottom: none;">
+  <div class="container">
+    <div class="card-grid">
+      <div class="card">
+        <h3>Minimum age</h3>
+        <p>Drivers must be 16 or older. Drivers under 18 need a parent or guardian's consent at time of booking. [Confirm your actual age policy — placeholder text]</p>
+      </div>
+      <div class="card">
+        <h3>Arrive on time</h3>
+        <p>Your session starts and ends at the times you booked. Arriving late doesn't extend your session — the room becomes available to the next booking automatically.</p>
+      </div>
+      <div class="card">
+        <h3>Treat the rig with care</h3>
+        <p>No food or drinks near the equipment. Please don't force the wheel, pedals, or shifter past their natural range of motion.</p>
+      </div>
+      <div class="card">
+        <h3>One driver per session</h3>
+        <p>Sessions are booked for a single driver. Spectators are welcome but should stay clear of the rig while it's in use.</p>
+      </div>
+      <div class="card">
+        <h3>Leave it ready for the next driver</h3>
+        <p>Reset your seat position and turn off any personal profile settings before you leave, so the next booking starts fresh.</p>
+      </div>
+      <div class="card">
+        <h3>Report issues immediately</h3>
+        <p>If something isn't working, use the contact info in your booking confirmation to let us know right away rather than trying to fix it yourself.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="brand">SIM <span>DRIFT</span></div>
+    <div class="foot-note">&copy; 2026 Sim Drift.</div>
+  </div>
+</footer>
+
+</body>
+</html>
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500&display=swap');
+
+:root {
+  --bg-black: #000000;
+  --bg-charcoal: #141414;
+  --bg-panel: #181818;
+  --line: #2c2c2c;
+  --white: #ffffff;
+  --grey: #999999;
+  --flame-1: #e10600;
+  --flame-2: #e10600;
+  --flame-3: #e10600;
+  --display: 'Rajdhani', sans-serif;
+  --body: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-black);
+  color: var(--white);
+  font-family: var(--body);
+  line-height: 1.6;
+}
+
+.checker-strip {
+  height: 8px;
+  width: 100%;
+  background-image:
+    linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
+    linear-gradient(45deg, #000 25%, #fff 25%, #fff 75%, #000 75%, #000);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+
+h1, h2, h3, .brand, .pricing-rate, .step-num {
+  font-family: var(--display);
+}
+
+a { color: inherit; text-decoration: none; }
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* BRAND */
+.brand {
+  font-weight: 700;
+  letter-spacing: 4px;
+  font-size: 1.15rem;
+  text-transform: uppercase;
+}
+.brand span, .accent-text {
+  background: var(--flame-2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* NAV */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #000000;
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+}
+.links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  font-size: 0.88rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+.links a { padding: 6px 0; border-bottom: 2px solid transparent; }
+.links a:hover { color: var(--white); }
+.links a.current { color: var(--flame-2); border-bottom-color: var(--flame-2); }
+.nav-book {
+  position: relative;
+  overflow: hidden;
+  background: var(--flame-2);
+  color: #ffffff !important;
+  padding: 14px 28px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  border-bottom: none !important;
+  animation: pulse-glow 2.2s ease-in-out infinite;
+  transition: transform 0.15s ease;
+}
+.nav-book:hover { color: #ffffff !important; transform: scale(1.06); }
+.nav-book::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: rgba(255,255,255,0.35);
+  transform: skewX(-20deg);
+  animation: sweep 2.8s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225,6,0,0.55); }
+  50% { box-shadow: 0 0 0 8px rgba(225,6,0,0); }
+}
+@keyframes sweep {
+  0% { left: -60%; }
+  50% { left: 130%; }
+  100% { left: 130%; }
+}
+
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+.menu-toggle span {
+  width: 24px;
+  height: 2px;
+  background: var(--white);
+  display: block;
+}
+
+.fab-book { display: none; }
+
+@media (max-width: 720px) {
+  .links {
+    display: none;
+    position: absolute;
+    top: 72px;
+    left: 0;
+    right: 0;
+    background: var(--bg-charcoal);
+    border-bottom: 1px solid var(--line);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 8px 24px 20px;
+  }
+  .links.open { display: flex; }
+  .links a { width: 100%; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .links a.current { border-bottom: 1px solid var(--line); }
+  .nav-book { margin-top: 10px; text-align: center; }
+  .menu-toggle { display: flex; }
+
+  .fab-book {
+    display: block;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 60;
+    padding: 18px 26px;
+    border-radius: 100px;
+    background: var(--flame-2);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 20px rgba(225,6,0,0.5);
+    animation: pulse-glow 2.2s ease-in-out infinite;
+  }
+}
+
+/* HERO */
+.hero {
+  position: relative;
+  padding: 90px 0 70px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+.hero-smoke {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(225,6,0,0.06) 0px,
+    rgba(225,6,0,0.06) 2px,
+    transparent 2px,
+    transparent 40px
+  );
+  animation: speed-shift 6s linear infinite;
+  pointer-events: none;
+}
+@keyframes speed-shift {
+  0% { background-position: 0 0; }
+  100% { background-position: -280px 280px; }
+}
+.hero-content { position: relative; z-index: 2; }
+.eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--flame-2);
+  border: 1px solid rgba(225,6,0,0.4);
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+}
+h1 {
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  max-width: 780px;
+  line-height: 1.05;
+}
+.hero p.lead {
+  margin-top: 24px;
+  max-width: 560px;
+  font-size: 1.1rem;
+  color: var(--grey);
+}
+.hero-ctas {
+  margin-top: 40px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-block;
+  padding: 16px 32px;
+  font-size: 0.9rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-radius: 4px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  border: none;
+  cursor: pointer;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-primary {
+  background: var(--flame-2);
+  color: #ffffff;
+}
+.btn-ghost {
+  border: 1px solid var(--line);
+  color: var(--white);
+  background: transparent;
+}
+.btn-ghost:hover { border-color: var(--flame-2); }
+.btn-block { width: 100%; text-align: center; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.cta-glow {
+  position: relative;
+  overflow: hidden;
+  animation: pulse-glow 2.2s ease-in-out infinite;
+}
+.cta-glow:hover { transform: translateY(-2px) scale(1.03); }
+.cta-glow::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: rgba(255,255,255,0.35);
+  transform: skewX(-20deg);
+  animation: sweep 2.8s ease-in-out infinite;
+}
+
+/* SECTIONS */
+.section { padding: 70px 0; border-bottom: 1px solid var(--line); }
+.section:last-of-type { border-bottom: none; }
+.section-label {
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--flame-2);
+  margin-bottom: 10px;
+}
+.section h2 {
+  font-size: clamp(2rem, 4.5vw, 2.8rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  max-width: 640px;
+  line-height: 1.1;
+}
+.section-sub {
+  margin-top: 14px;
+  color: var(--grey);
+  max-width: 560px;
+}
+
+/* HOW IT WORKS / STEPS */
+.steps {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.step {
+  position: relative;
+  border-left: 1px solid var(--line);
+  padding-left: 24px;
+}
+.step:first-child { border-left: none; padding-left: 0; }
+.step-num {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--flame-2);
+  line-height: 1;
+  margin-bottom: 18px;
+}
+.step h3 {
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.step p { color: var(--grey); font-size: 0.92rem; }
+
+@media (max-width: 860px) {
+  .steps { grid-template-columns: 1fr 1fr; gap: 40px 0; }
+  .step { border-left: none; padding-left: 0; padding-top: 24px; border-top: 1px solid var(--line); }
+  .step:first-child { border-top: none; padding-top: 0; }
+}
+@media (max-width: 520px) {
+  .steps { grid-template-columns: 1fr; }
+}
+
+/* PRICING CARD */
+.pricing-card {
+  margin-top: 56px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+.pricing-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--flame-2);
+}
+.pricing-rate {
+  font-size: clamp(3rem, 8vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1;
+}
+.pricing-rate span {
+  font-size: 1.2rem;
+  color: var(--grey);
+  font-weight: 400;
+  margin-left: 8px;
+}
+.pricing-desc { max-width: 380px; color: var(--grey); }
+.pricing-desc strong { color: var(--white); display: block; margin-bottom: 8px; font-size: 1.05rem; }
+
+/* CARDS / GRID */
+.card-grid {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+@media (max-width: 700px) { .card-grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 28px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.card:hover {
+  border-color: rgba(225,6,0,0.5);
+  transform: translateY(-3px);
+}
+.card h3 {
+  font-size: 1.05rem;
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  color: var(--flame-2);
+}
+.card p { color: var(--grey); font-size: 0.95rem; }
+
+/* FAQ ACCORDION-STYLE (static, no JS needed) */
+.faq-item {
+  border-bottom: 1px solid var(--line);
+  padding: 26px 0;
+}
+.faq-item:first-child { padding-top: 0; }
+.faq-item h3 {
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+}
+.faq-item p { color: var(--grey); font-size: 0.95rem; max-width: 640px; }
+
+/* PLACEHOLDER IMAGE BLOCK */
+.placeholder-img {
+  background: repeating-linear-gradient(45deg, #1c1c1c, #1c1c1c 10px, #191919 10px, #191919 20px);
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--grey);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  min-height: 220px;
+}
+
+/* BOOKING FORM */
+.booking-panel {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 32px;
+}
+@media (max-width: 800px) { .booking-panel { grid-template-columns: 1fr; } }
+
+.form-card, .summary-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 32px;
+}
+.field { margin-bottom: 22px; }
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--grey);
+  margin-bottom: 8px;
+}
+.field input, .field select {
+  width: 100%;
+  background: var(--bg-charcoal);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px 14px;
+  color: var(--white);
+  font-size: 0.95rem;
+}
+.field input:focus, .field select:focus {
+  outline: none;
+  border-color: var(--flame-2);
+}
+.duration-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.duration-opt {
+  flex: 1;
+  min-width: 80px;
+  text-align: center;
+  padding: 12px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--bg-charcoal);
+}
+.duration-opt.selected {
+  border-color: var(--flame-2);
+  background: rgba(225,6,0,0.12);
+  color: var(--flame-2);
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+  color: var(--grey);
+}
+.summary-row.total {
+  border-bottom: none;
+  color: var(--white);
+  font-size: 1.3rem;
+  font-weight: 800;
+  padding-top: 20px;
+}
+.lock-note {
+  margin-top: 18px;
+  padding: 14px 16px;
+  background: rgba(225,6,0,0.08);
+  border: 1px solid rgba(225,6,0,0.3);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--grey);
+}
+.lock-note strong { color: var(--flame-2); }
+
+/* FOOTER */
+footer { padding: 48px 0; }
+footer .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+footer .foot-note { color: var(--grey); font-size: 0.85rem; }
