@@ -46,12 +46,12 @@ module.exports = async (req, res) => {
       ],
       metadata: { date, time, duration: String(hours), name, email },
       success_url: `${SITE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${SITE_URL}/index.html`,
+      cancel_url: `${SITE_URL}/book.html`,
     });
 
     return res.status(200).json({ url: session.url });
   } catch (err) {
     console.error('Checkout session error:', err);
-    return res.status(500).json({ error: 'Could not start checkout', debug: err.message });
+    return res.status(500).json({ error: 'Could not start checkout' });
   }
 };
