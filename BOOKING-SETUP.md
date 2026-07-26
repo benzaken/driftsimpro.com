@@ -5,17 +5,27 @@ prevention, and a maintenance/cleaning block list) on top of the existing
 Stripe + Seam flow. Two things need to be set up in your Vercel dashboard
 before this goes live.
 
-## 1. Create a Vercel KV store
+## 1. Create a Redis database (via the Marketplace)
+
+Vercel's old first-party "KV" product was retired — Redis now comes through
+the Marketplace instead (Upstash is the common provider). The env var names
+end up slightly different depending on how you connect it, so the code
+accepts either naming automatically.
 
 1. Go to your project on vercel.com → **Storage** tab.
-2. Click **Create Database** → choose **KV** (built on Upstash Redis).
-3. Name it anything (e.g. `simdrift-bookings`) and create it.
-4. On the next screen, click **Connect Project** and select this project
-   (driftsimpro.com / driftsimpro-com). Vercel automatically adds the
-   required environment variables (`KV_REST_API_URL`, `KV_REST_API_TOKEN`,
-   etc.) — you don't need to copy/paste anything yourself.
-5. Redeploy the project once (Vercel usually prompts you to) so the new
-   env vars take effect.
+2. Click **Create Database** (top right).
+3. You'll see a list of marketplace database providers. Search for or select
+   **Redis** — this is usually powered by **Upstash**. (Ignore Postgres/SQL
+   options — you may already have one connected for something else, like the
+   `aws-apg-bistre-apple` Aurora Postgres database, which isn't used by this
+   booking code at all.)
+4. Give it a name (e.g. `simdrift-bookings`), pick a region, and create it.
+5. If prompted, click **Connect Project** and select this project
+   (driftsimpro.com / driftsimpro-com). This automatically adds the required
+   environment variables to your project — you don't need to copy or type
+   anything yourself.
+6. Redeploy the project once (Vercel usually prompts you to) so the new env
+   vars take effect.
 
 That's it — bookings, holds, and blocked times are all stored there.
 
@@ -34,8 +44,8 @@ without touching code. It's protected by a simple shared password.
 ## What changed, in plain terms
 
 - Customers now pick a date, a duration, and one of several fixed start
-  times spaced 45 minutes apart (e.g. 12:00, 12:45, 1:30...) instead of
-  typing in any time they want.
+  times spaced 45 minutes apart, grouped into Morning/Afternoon/Evening/Night,
+  instead of typing in any time they want.
 - Times that are already booked, or that you've manually blocked in
   `admin.html`, are shown crossed out and can't be selected.
 - When someone starts checkout, that slot is held for 30 minutes (matching
