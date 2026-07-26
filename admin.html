@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin | Sim Drift</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style-wa.css">
+<style>
+  .admin-wrap { max-width: 640px; margin: 0 auto; padding: 60px 28px 100px; }
+  .admin-wrap h1 { font-size: 1.6rem; margin-bottom: 6px; }
+  .admin-wrap .lead { color: var(--grey); margin-bottom: 32px; }
+  .block-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 0.9rem;
+  }
+  .block-row .meta { color: var(--grey); font-size: 0.82rem; margin-top: 2px; }
+  .btn-danger { background: transparent; border: 1px solid var(--red); color: var(--red); border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 0.82rem; }
+  .btn-danger:hover { background: rgba(200,55,44,0.06); }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .msg { font-size: 0.85rem; margin-top: 10px; }
+  .msg.error { color: var(--red); }
+  .msg.ok { color: var(--green, #1e7a46); }
+  #gate { max-width: 360px; margin: 100px auto; padding: 0 28px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="index.html" class="brand">SIM DRIFT</a>
+    <div class="nav-links">
+      <a href="book.html" class="nav-book">Book Now</a>
+    </div>
+  </div>
+</nav>
+
+<div id="gate">
+  <div class="form-card">
+    <div class="field">
+      <label for="admin-key">Admin key</label>
+      <input type="password" id="admin-key" placeholder="Enter your admin key">
+    </div>
+    <button class="btn btn-primary btn-block" id="unlock-btn">Unlock</button>
+    <div class="msg error" id="gate-msg"></div>
+  </div>
+</div>
+
+<div class="admin-wrap" id="admin-panel" style="display: none;">
+  <h1>Blocked times</h1>
+  <p class="lead">Block off maintenance, cleaning, or any other window when the rig shouldn't be bookable. Existing paid bookings are never shown here — this is only for manual blocks.</p>
+
+  <div class="form-card" style="margin-bottom: 32px;">
+    <div class="row-2">
+      <div class="field">
+        <label for="b-date">Date</label>
+        <input type="date" id="b-date">
+      </div>
+      <div class="field"></div>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label for="b-start">Start time</label>
+        <input type="time" id="b-start">
+      </div>
+      <div class="field">
+        <label for="b-end">End time</label>
+        <input type="time" id="b-end">
+      </div>
+    </div>
+    <div class="field">
+      <label for="b-reason">Reason (optional)</label>
+      <input type="text" id="b-reason" placeholder="e.g. cleaning, maintenance">
+    </div>
+    <button class="btn btn-primary" id="add-btn">Add blocked window</button>
+    <div class="msg" id="add-msg"></div>
+  </div>
+
+  <h1 style="font-size: 1.2rem;">Currently blocked</h1>
+  <div id="block-list"></div>
+</div>
+
+<script>
+  const BACKEND_URL = 'https://driftsimpro-com.vercel.app';
+  let adminKey = '';
+
+  const gate = document.getElementById('gate');
+  const panel = document.getElementById('admin-panel');
+  const gateMsg = document.getElementById('gate-msg');
+
+  async function authFetch(path, options = {}) {
+    const res = await fetch(`${BACKEND_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Key': adminKey,
+        ...(options.headers || {}),
+      },
+    });
+    return res;
+  }
+
+  async function loadBlocks() {
+    const listEl = document.getElementById('block-list');
+    listEl.textContent = 'Loading…';
+    try {
+      const res = await authFetch('/api/admin-blocks');
+      if (!res.ok) throw new Error('load failed');
+      const data = await res.json();
+      const ranges = data.ranges || [];
+      if (!ranges.length) {
+        listEl.innerHTML = '<p class="lead">Nothing blocked right now.</p>';
+        return;
+      }
+      listEl.innerHTML = '';
+      ranges
+        .slice()
+        .sort((a, b) => new Date(a.start) - new Date(b.start))
+        .forEach((r) => {
+          const row = document.createElement('div');
+          row.className = 'block-row';
+          const start = new Date(r.start);
+          const end = new Date(r.end);
+          const fmt = (d) => d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+          row.innerHTML = `
+            <div>
+              <div>${fmt(start)} – ${fmt(end)}</div>
+              <div class="meta">${r.reason ? r.reason : 'No reason given'}</div>
+            </div>
+          `;
+          const delBtn = document.createElement('button');
+          delBtn.className = 'btn-danger';
+          delBtn.textContent = 'Remove';
+          delBtn.addEventListener('click', () => removeBlock(r.id));
+          row.appendChild(delBtn);
+          listEl.appendChild(row);
+        });
+    } catch (err) {
+      listEl.innerHTML = '<p class="msg error">Could not load blocked times.</p>';
+    }
+  }
+
+  async function removeBlock(id) {
+    try {
+      const res = await authFetch(`/api/admin-blocks?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('delete failed');
+      loadBlocks();
+    } catch (err) {
+      alert('Could not remove that block. Please try again.');
+    }
+  }
+
+  document.getElementById('unlock-btn').addEventListener('click', async () => {
+    const key = document.getElementById('admin-key').value.trim();
+    if (!key) return;
+    adminKey = key;
+    gateMsg.textContent = '';
+    try {
+      const res = await authFetch('/api/admin-blocks');
+      if (res.status === 401) {
+        gateMsg.textContent = 'Wrong admin key.';
+        adminKey = '';
+        return;
+      }
+      if (!res.ok) throw new Error('unexpected error');
+      gate.style.display = 'none';
+      panel.style.display = 'block';
+      loadBlocks();
+    } catch (err) {
+      gateMsg.textContent = 'Could not reach the server. Please try again.';
+      adminKey = '';
+    }
+  });
+
+  document.getElementById('add-btn').addEventListener('click', async () => {
+    const date = document.getElementById('b-date').value;
+    const startTime = document.getElementById('b-start').value;
+    const endTime = document.getElementById('b-end').value;
+    const reason = document.getElementById('b-reason').value.trim();
+    const msgEl = document.getElementById('add-msg');
+
+    if (!date || !startTime || !endTime) {
+      msgEl.className = 'msg error';
+      msgEl.textContent = 'Please fill in date, start time, and end time.';
+      return;
+    }
+
+    try {
+      const res = await authFetch('/api/admin-blocks', {
+        method: 'POST',
+        body: JSON.stringify({ date, startTime, endTime, reason }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        msgEl.className = 'msg error';
+        msgEl.textContent = data.error || 'Could not add that block.';
+        return;
+      }
+      msgEl.className = 'msg ok';
+      msgEl.textContent = 'Added.';
+      document.getElementById('b-reason').value = '';
+      loadBlocks();
+    } catch (err) {
+      msgEl.className = 'msg error';
+      msgEl.textContent = 'Could not reach the server. Please try again.';
+    }
+  });
+</script>
+
+</body>
+</html>
