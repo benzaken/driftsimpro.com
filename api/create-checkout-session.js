@@ -2,7 +2,22 @@ const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const SITE_URL = 'https://driftsimpro.com';
-const HOURLY_RATE_CENTS = 3500; // $35/hr
+
+// Duration options, keyed by duration in minutes -> price in cents.
+// 40 min is a flat rate; 2 hr and 3 hr stay at the $35/hr rate.
+const PRICE_TABLE = {
+  40: 2500,   // 40 min — $25 flat
+  120: 7000,  // 2 hr — $35/hr
+  180: 10500, // 3 hr — $35/hr
+};
+
+function formatDuration(minutes) {
+  if (minutes % 60 === 0) {
+    const hrs = minutes / 60;
+    return `${hrs} hr`;
+  }
+  return `${minutes} min`;
+}
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', SITE_URL);
@@ -23,8 +38,9 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Missing required booking details' });
     }
 
-    const hours = parseInt(duration, 10);
-    if (!hours || hours < 1 || hours > 12) {
+    const minutes = parseInt(duration, 10);
+    const unitAmount = PRICE_TABLE[minutes];
+    if (!unitAmount) {
       return res.status(400).json({ error: 'Invalid duration' });
     }
 
@@ -37,14 +53,14 @@ module.exports = async (req, res) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: `Sim Drift session — ${hours} hr (${date} ${time})`,
+              name: `Sim Drift session — ${formatDuration(minutes)} (${date} ${time})`,
             },
-            unit_amount: hours * HOURLY_RATE_CENTS,
+            unit_amount: unitAmount,
           },
           quantity: 1,
         },
       ],
-      metadata: { date, time, duration: String(hours), name, email },
+      metadata: { date, time, duration: String(minutes), name, email },
       success_url: `${SITE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/book.html`,
     });

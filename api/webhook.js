@@ -24,7 +24,7 @@ function buffer(readable) {
 
 async function createLockCode(session) {
   const { date, time, duration } = session.metadata;
-  const hours = parseInt(duration, 10);
+  const minutes = parseInt(duration, 10); // duration is stored in minutes
 
   const startsAt = DateTime.fromISO(`${date}T${time}`, { zone: VENUE_TIMEZONE });
 
@@ -34,7 +34,7 @@ async function createLockCode(session) {
   // real customer bookings.
   const endsAt = process.env.TEST_SHORT_CODES === 'true'
     ? startsAt.plus({ minutes: 3 })
-    : startsAt.plus({ hours });
+    : startsAt.plus({ minutes });
 
   const codeName = `SD-${session.id.slice(-12)}`;
 

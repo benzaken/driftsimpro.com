@@ -79,7 +79,9 @@
 
         document.getElementById('out-date').textContent = data.date;
         document.getElementById('out-time').textContent = data.time;
-        document.getElementById('out-duration').textContent = data.duration + ' hr';
+        const durMinutes = parseInt(data.duration, 10);
+        const durText = (durMinutes % 60 === 0) ? (durMinutes / 60) + ' hr' : durMinutes + ' min';
+        document.getElementById('out-duration').textContent = durText;
         card.style.display = 'block';
 
         if (data.code) {
