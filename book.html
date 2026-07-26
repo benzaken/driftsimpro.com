@@ -41,9 +41,8 @@
         <div class="field">
           <label>Duration</label>
           <div class="duration-options">
-            <div class="duration-opt" data-minutes="40" data-price="25">40 min</div>
-            <div class="duration-opt selected" data-minutes="120" data-price="70">2 hr</div>
-            <div class="duration-opt" data-minutes="180" data-price="105">3 hr</div>
+            <div class="duration-opt" data-minutes="30" data-price="17.50">30 min</div>
+            <div class="duration-opt selected" data-minutes="60" data-price="35">1 hr</div>
           </div>
         </div>
         <div class="field">
@@ -200,10 +199,11 @@
         section.slots.forEach((slot) => {
           const btn = document.createElement('div');
           btn.className = 'slot-btn' + (slot.available ? '' : ' unavailable');
-          btn.textContent = to12Hour(slot.start);
-          btn.title = slot.available
-            ? `${to12Hour(slot.start)} – ${to12Hour(formatEndTime(slot.start, minutes).replace(' (+1 day)', ''))}`
-            : 'Not available';
+          const rawEnd = formatEndTime(slot.start, minutes);
+          const crossesDay = rawEnd.includes('+1 day');
+          const endLabel = to12Hour(rawEnd.replace(' (+1 day)', '')) + (crossesDay ? ' +1d' : '');
+          btn.textContent = `${to12Hour(slot.start)} – ${endLabel}`;
+          btn.title = slot.available ? '' : 'Not available';
           if (slot.available) {
             btn.addEventListener('click', () => {
               document.querySelectorAll('.slot-btn.selected').forEach((el) => el.classList.remove('selected'));

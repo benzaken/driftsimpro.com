@@ -153,8 +153,9 @@ nav.on-video .nav-links a:not(.nav-book) { color: #FFFFFF; }
 .slot-section-title:first-child { margin-top: 0; }
 .slot-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .slot-btn {
-  text-align: center; padding: 10px 16px; border: 1px solid var(--line); border-radius: 100px;
-  cursor: pointer; font-size: 0.85rem; font-weight: 600; background: var(--ink); color: #fff;
+  text-align: center; padding: 8px 12px; border: 1px solid var(--line); border-radius: 100px;
+  cursor: pointer; font-size: 0.78rem; font-weight: 600; background: var(--ink); color: #fff;
+  white-space: nowrap;
 }
 .slot-btn:hover { opacity: 0.85; }
 .slot-btn.selected { background: var(--red); border-color: var(--red); }

@@ -8,11 +8,10 @@ const SITE_URL = 'https://driftsimpro.com';
 const HOLD_MINUTES = 30; // matches Stripe's minimum checkout session expiry
 
 // Duration options, keyed by duration in minutes -> price in cents.
-// 40 min is a flat rate; 2 hr and 3 hr stay at the $35/hr rate.
+// Both prorate at the $35/hr rate.
 const PRICE_TABLE = {
-  40: 2500,   // 40 min — $25 flat
-  120: 7000,  // 2 hr — $35/hr
-  180: 10500, // 3 hr — $35/hr
+  30: 1750, // 30 min — $17.50
+  60: 3500, // 1 hr — $35
 };
 
 function formatDuration(minutes) {
