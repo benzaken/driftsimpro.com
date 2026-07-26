@@ -122,13 +122,36 @@
     return crossesDay ? `${label} (+1 day)` : label;
   }
 
+  // "14:30" -> "2:30pm"
+  function to12Hour(hhmm) {
+    const [h, m] = hhmm.split(':').map(Number);
+    const period = h >= 12 ? 'pm' : 'am';
+    let h12 = h % 12;
+    if (h12 === 0) h12 = 12;
+    return `${h12}:${String(m).padStart(2, '0')}${period}`;
+  }
+
+  const SLOT_SECTIONS = [
+    { label: 'Night', test: (h) => h >= 0 && h < 6 },
+    { label: 'Morning', test: (h) => h >= 6 && h < 12 },
+    { label: 'Afternoon', test: (h) => h >= 12 && h < 18 },
+    { label: 'Evening', test: (h) => h >= 18 && h < 24 },
+  ];
+
+  function groupSlots(slots) {
+    return SLOT_SECTIONS.map((section) => ({
+      label: section.label,
+      slots: slots.filter((s) => section.test(parseInt(s.start.split(':')[0], 10))),
+    })).filter((section) => section.slots.length > 0);
+  }
+
   function updateSummaryTime() {
     if (!selectedSlot) {
       summaryTime.textContent = '—';
       return;
     }
     const { minutes } = selectedDuration();
-    summaryTime.textContent = `${selectedSlot} – ${formatEndTime(selectedSlot, minutes)}`;
+    summaryTime.textContent = `${to12Hour(selectedSlot)} – ${to12Hour(formatEndTime(selectedSlot, minutes).replace(' (+1 day)', ''))}${formatEndTime(selectedSlot, minutes).includes('+1 day') ? ' (+1 day)' : ''}`;
   }
 
   function updateSummaryDuration() {
@@ -165,19 +188,34 @@
         return;
       }
 
-      data.slots.forEach((slot) => {
-        const btn = document.createElement('div');
-        btn.className = 'slot-btn' + (slot.available ? '' : ' unavailable');
-        btn.textContent = `${slot.start} – ${formatEndTime(slot.start, minutes)}`;
-        if (slot.available) {
-          btn.addEventListener('click', () => {
-            document.querySelectorAll('.slot-btn.selected').forEach((el) => el.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedSlot = slot.start;
-            updateSummaryTime();
-          });
-        }
-        slotGrid.appendChild(btn);
+      groupSlots(data.slots).forEach((section) => {
+        const heading = document.createElement('div');
+        heading.className = 'slot-section-title';
+        heading.textContent = section.label;
+        slotGrid.appendChild(heading);
+
+        const row = document.createElement('div');
+        row.className = 'slot-row';
+
+        section.slots.forEach((slot) => {
+          const btn = document.createElement('div');
+          btn.className = 'slot-btn' + (slot.available ? '' : ' unavailable');
+          btn.textContent = to12Hour(slot.start);
+          btn.title = slot.available
+            ? `${to12Hour(slot.start)} – ${to12Hour(formatEndTime(slot.start, minutes).replace(' (+1 day)', ''))}`
+            : 'Not available';
+          if (slot.available) {
+            btn.addEventListener('click', () => {
+              document.querySelectorAll('.slot-btn.selected').forEach((el) => el.classList.remove('selected'));
+              btn.classList.add('selected');
+              selectedSlot = slot.start;
+              updateSummaryTime();
+            });
+          }
+          row.appendChild(btn);
+        });
+
+        slotGrid.appendChild(row);
       });
     } catch (err) {
       if (requestId !== slotsRequestId) return;
