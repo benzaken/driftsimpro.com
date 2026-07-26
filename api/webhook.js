@@ -1,17 +1,10 @@
 const Stripe = require('stripe');
 const { DateTime } = require('luxon');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const { confirmBooking, releaseHold } = require('../lib/store');
 
 // The local time zone your booking times are entered in.
 const VENUE_TIMEZONE = 'America/New_York';
-
-// Stripe needs the raw request body to verify the webhook signature,
-// so we turn off Vercel's automatic JSON parsing for this endpoint.
-module.exports.config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 function buffer(readable) {
   return new Promise((resolve, reject) => {
@@ -62,7 +55,7 @@ async function createLockCode(session) {
   console.log('Seam access code requested:', codeName, seamData);
 }
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).end();
   }
@@ -81,11 +74,40 @@ module.exports = async (req, res) => {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     try {
+      if (session.metadata && session.metadata.bookingId) {
+        await confirmBooking(session.metadata.bookingId);
+      }
       await createLockCode(session);
     } catch (err) {
       console.error('Failed to create lock code for session', session.id, err);
     }
   }
 
+  // If a customer never finishes paying, Stripe expires the checkout
+  // session — free up the slot so someone else can book it.
+  if (event.type === 'checkout.session.expired') {
+    const session = event.data.object;
+    if (session.metadata && session.metadata.bookingId) {
+      try {
+        await releaseHold(session.metadata.bookingId);
+      } catch (err) {
+        console.error('Failed to release hold for expired session', session.id, err);
+      }
+    }
+  }
+
   return res.status(200).json({ received: true });
+}
+
+// Stripe needs the raw request body to verify the webhook signature,
+// so we turn off Vercel's automatic JSON parsing for this endpoint.
+// (This must be attached to the exported function itself — attaching it
+// to module.exports before reassigning module.exports below would get
+// silently discarded.)
+handler.config = {
+  api: {
+    bodyParser: false,
+  },
 };
+
+module.exports = handler;

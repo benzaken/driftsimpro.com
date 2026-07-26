@@ -25,7 +25,7 @@
   <div class="wrap">
     <div class="eyebrow">Book your own session</div>
     <h1>Reserve your time on the rig</h1>
-    <p class="lead">Pick a date, time, and duration. You'll get everything you need to walk in and drive at your booked time — no one else involved.</p>
+    <p class="lead">Pick a date, duration, and an open slot. You'll get everything you need to walk in and drive at your booked time — no one else involved.</p>
   </div>
 </section>
 
@@ -39,15 +39,17 @@
           <input type="date" id="date">
         </div>
         <div class="field">
-          <label for="time">Start time</label>
-          <input type="time" id="time">
-        </div>
-        <div class="field">
           <label>Duration</label>
           <div class="duration-options">
             <div class="duration-opt" data-minutes="40" data-price="25">40 min</div>
             <div class="duration-opt selected" data-minutes="120" data-price="70">2 hr</div>
             <div class="duration-opt" data-minutes="180" data-price="105">3 hr</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Start time</label>
+          <div id="slot-grid" class="slot-grid">
+            <div class="slot-hint">Pick a date to see open times.</div>
           </div>
         </div>
         <div class="field">
@@ -63,10 +65,11 @@
       <div class="summary-card">
         <div class="summary-row"><span>Rate</span><span>$35 / hr</span></div>
         <div class="summary-row"><span>Duration</span><span id="summary-duration">2 hr</span></div>
+        <div class="summary-row"><span>Time</span><span id="summary-time">—</span></div>
         <div class="summary-row total"><span>Total</span><span id="summary-total">$70</span></div>
         <button class="btn btn-primary btn-block" style="margin-top: 20px;" id="pay-btn">Continue to payment</button>
         <div class="lock-note">
-          <strong>Automatic access:</strong> once payment is confirmed, you'll get a temporary door code that works only during your reserved hour.
+          <strong>Automatic access:</strong> once payment is confirmed, you'll get a temporary door code that works only during your reserved session.
         </div>
       </div>
 
@@ -84,55 +87,154 @@
 <script>
   const BACKEND_URL = 'https://driftsimpro-com.vercel.app';
 
+  const dateInput = document.getElementById('date');
+  const slotGrid = document.getElementById('slot-grid');
   const opts = document.querySelectorAll('.duration-opt');
   const summaryDuration = document.getElementById('summary-duration');
+  const summaryTime = document.getElementById('summary-time');
   const summaryTotal = document.getElementById('summary-total');
+  const payBtn = document.getElementById('pay-btn');
+
+  // Default the date picker to today, and don't allow picking the past.
+  const todayStr = new Date().toISOString().slice(0, 10);
+  dateInput.min = todayStr;
+  dateInput.value = todayStr;
+
+  let selectedSlot = null; // "HH:MM" string
+  let slotsRequestId = 0;
+
+  function selectedDuration() {
+    const opt = document.querySelector('.duration-opt.selected');
+    return {
+      minutes: opt ? parseInt(opt.dataset.minutes, 10) : 120,
+      price: opt ? opt.dataset.price : '70',
+      label: opt ? opt.textContent : '2 hr',
+    };
+  }
+
+  function formatEndTime(startHHMM, durationMinutes) {
+    const [h, m] = startHHMM.split(':').map(Number);
+    const totalMin = h * 60 + m + durationMinutes;
+    const endH = Math.floor((totalMin % (24 * 60)) / 60);
+    const endM = totalMin % 60;
+    const crossesDay = totalMin >= 24 * 60;
+    const label = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+    return crossesDay ? `${label} (+1 day)` : label;
+  }
+
+  function updateSummaryTime() {
+    if (!selectedSlot) {
+      summaryTime.textContent = '—';
+      return;
+    }
+    const { minutes } = selectedDuration();
+    summaryTime.textContent = `${selectedSlot} – ${formatEndTime(selectedSlot, minutes)}`;
+  }
+
+  function updateSummaryDuration() {
+    const { label, price } = selectedDuration();
+    summaryDuration.textContent = label;
+    summaryTotal.textContent = '$' + price;
+    updateSummaryTime();
+  }
+
+  async function loadSlots() {
+    const date = dateInput.value;
+    const { minutes } = selectedDuration();
+    selectedSlot = null;
+    updateSummaryTime();
+
+    if (!date) {
+      slotGrid.innerHTML = '<div class="slot-hint">Pick a date to see open times.</div>';
+      return;
+    }
+
+    slotGrid.innerHTML = '<div class="slot-hint">Loading open times…</div>';
+    const requestId = ++slotsRequestId;
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/availability?date=${encodeURIComponent(date)}&duration=${minutes}`);
+      if (requestId !== slotsRequestId) return; // a newer request has since started
+      if (!res.ok) throw new Error('bad response');
+      const data = await res.json();
+
+      slotGrid.innerHTML = '';
+      const anyAvailable = data.slots.some((s) => s.available);
+      if (!anyAvailable) {
+        slotGrid.innerHTML = '<div class="slot-hint">No open times for that date. Try another day.</div>';
+        return;
+      }
+
+      data.slots.forEach((slot) => {
+        const btn = document.createElement('div');
+        btn.className = 'slot-btn' + (slot.available ? '' : ' unavailable');
+        btn.textContent = `${slot.start} – ${formatEndTime(slot.start, minutes)}`;
+        if (slot.available) {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.slot-btn.selected').forEach((el) => el.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedSlot = slot.start;
+            updateSummaryTime();
+          });
+        }
+        slotGrid.appendChild(btn);
+      });
+    } catch (err) {
+      if (requestId !== slotsRequestId) return;
+      slotGrid.innerHTML = '<div class="slot-hint">Could not load open times. Please try again.</div>';
+    }
+  }
 
   opts.forEach(opt => {
     opt.addEventListener('click', () => {
       opts.forEach(o => o.classList.remove('selected'));
       opt.classList.add('selected');
-      summaryDuration.textContent = opt.textContent;
-      summaryTotal.textContent = '$' + opt.dataset.price;
+      updateSummaryDuration();
+      loadSlots();
     });
   });
 
-  document.getElementById('pay-btn').addEventListener('click', async () => {
-    const date = document.getElementById('date').value;
-    const time = document.getElementById('time').value;
+  dateInput.addEventListener('change', loadSlots);
+
+  updateSummaryDuration();
+  loadSlots();
+
+  payBtn.addEventListener('click', async () => {
+    const date = dateInput.value;
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
-    const selected = document.querySelector('.duration-opt.selected');
-    const duration = selected ? selected.dataset.minutes : '120';
+    const { minutes } = selectedDuration();
 
-    if (!date || !time || !name || !email) {
-      alert('Please fill in date, time, name, and email.');
+    if (!date || !selectedSlot || !name || !email) {
+      alert('Please pick a date, an open time slot, and fill in your name and email.');
       return;
     }
 
-    const btn = document.getElementById('pay-btn');
-    btn.disabled = true;
-    btn.textContent = 'Redirecting to payment…';
+    payBtn.disabled = true;
+    payBtn.textContent = 'Redirecting to payment…';
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, time, duration, name, email }),
+        body: JSON.stringify({ date, time: selectedSlot, duration: String(minutes), name, email }),
       });
       const data = await res.json();
 
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert('Something went wrong starting checkout. Please try again.');
-        btn.disabled = false;
-        btn.textContent = 'Continue to payment';
+        alert(data.error || 'Something went wrong starting checkout. Please try again.');
+        payBtn.disabled = false;
+        payBtn.textContent = 'Continue to payment';
+        if (res.status === 409) {
+          loadSlots(); // slot got taken — refresh the grid
+        }
       }
     } catch (err) {
       alert('Could not reach the booking server. Please try again.');
-      btn.disabled = false;
-      btn.textContent = 'Continue to payment';
+      payBtn.disabled = false;
+      payBtn.textContent = 'Continue to payment';
     }
   });
 </script>
