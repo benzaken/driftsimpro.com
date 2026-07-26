@@ -45,9 +45,9 @@
         <div class="field">
           <label>Duration</label>
           <div class="duration-options">
-            <div class="duration-opt" data-hours="1">1 hr</div>
-            <div class="duration-opt selected" data-hours="2">2 hr</div>
-            <div class="duration-opt" data-hours="3">3 hr</div>
+            <div class="duration-opt" data-minutes="40" data-price="25">40 min</div>
+            <div class="duration-opt selected" data-minutes="120" data-price="70">2 hr</div>
+            <div class="duration-opt" data-minutes="180" data-price="105">3 hr</div>
           </div>
         </div>
         <div class="field">
@@ -84,7 +84,6 @@
 <script>
   const BACKEND_URL = 'https://driftsimpro-com.vercel.app';
 
-  const rate = 35;
   const opts = document.querySelectorAll('.duration-opt');
   const summaryDuration = document.getElementById('summary-duration');
   const summaryTotal = document.getElementById('summary-total');
@@ -93,9 +92,8 @@
     opt.addEventListener('click', () => {
       opts.forEach(o => o.classList.remove('selected'));
       opt.classList.add('selected');
-      const hours = parseInt(opt.dataset.hours, 10);
-      summaryDuration.textContent = hours + ' hr';
-      summaryTotal.textContent = '$' + (hours * rate);
+      summaryDuration.textContent = opt.textContent;
+      summaryTotal.textContent = '$' + opt.dataset.price;
     });
   });
 
@@ -105,7 +103,7 @@
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
     const selected = document.querySelector('.duration-opt.selected');
-    const duration = selected ? selected.dataset.hours : '2';
+    const duration = selected ? selected.dataset.minutes : '120';
 
     if (!date || !time || !name || !email) {
       alert('Please fill in date, time, name, and email.');
