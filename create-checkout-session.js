@@ -1,11 +1,12 @@
 const Stripe = require('stripe');
 const { DateTime } = require('luxon');
-const crypto = require('crypto');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-const { reserveHold, releaseHold, VENUE_TIMEZONE } = require('./lib/store');
+const { getBooking, updateBooking, VENUE_TIMEZONE } = require('../lib/store');
+
+// Stripe requires checkout session expiry to be at least 30 minutes out.
+const MIN_CHECKOUT_MINUTES = 31;
 
 const SITE_URL = 'https://driftsimpro.com';
-const HOLD_MINUTES = 30; // matches Stripe's minimum checkout session expiry
 
 // Duration options, keyed by duration in minutes -> price in cents.
 // Both prorate at the $35/hr rate.
@@ -34,37 +35,42 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { date, time, duration, name, email } = req.body;
-
-    if (!date || !time || !duration || !name || !email) {
-      return res.status(400).json({ error: 'Missing required booking details' });
+    // Payment now always follows identity verification: the client only
+    // ever sends the bookingId it got back from create-verification-session.
+    // Everything about the booking (date/time/duration/name/email) is read
+    // from the held record itself, not trusted from the request body — that
+    // also stops someone from swapping in a cheaper duration after the fact.
+    const { bookingId } = req.body;
+    if (!bookingId) {
+      return res.status(400).json({ error: 'Missing bookingId' });
     }
 
+    const booking = await getBooking(bookingId);
+    if (!booking) {
+      return res.status(404).json({ error: 'That booking has expired. Please start over.' });
+    }
+    if (booking.verificationStatus !== 'verified') {
+      return res.status(403).json({ error: 'Identity verification has not been completed yet.' });
+    }
+    if (!booking.meta) {
+      return res.status(400).json({ error: 'Booking is missing details. Please start over.' });
+    }
+
+    const { date, time, duration, name, email } = booking.meta;
     const minutes = parseInt(duration, 10);
     const unitAmount = PRICE_TABLE[minutes];
     if (!unitAmount) {
       return res.status(400).json({ error: 'Invalid duration' });
     }
 
-    const startAt = DateTime.fromISO(`${date}T${time}`, { zone: VENUE_TIMEZONE });
-    if (!startAt.isValid) {
-      return res.status(400).json({ error: 'Invalid date or time' });
-    }
-    const endAt = startAt.plus({ minutes });
-
-    const bookingId = crypto.randomUUID();
-    const hold = await reserveHold({
-      id: bookingId,
-      startAt: startAt.toJSDate(),
-      endAt: endAt.toJSDate(),
-      holdMinutes: HOLD_MINUTES,
-    });
-
-    if (!hold.ok) {
-      const message = hold.reason === 'past'
-        ? 'That time has already passed. Please pick another slot.'
-        : 'That time was just booked or is blocked. Please pick another slot.';
-      return res.status(409).json({ error: message });
+    // If ID verification took a while, the original hold may now be too
+    // close to expiry for Stripe's 30-min-minimum checkout window. Extend
+    // the hold to match rather than let checkout outlive it.
+    const minExpiry = Date.now() + MIN_CHECKOUT_MINUTES * 60000;
+    let expiresAtMs = new Date(booking.expiresAt).getTime();
+    if (expiresAtMs < minExpiry) {
+      expiresAtMs = minExpiry;
+      await updateBooking(bookingId, { expiresAt: new Date(expiresAtMs).toISOString() });
     }
 
     let session;
@@ -73,7 +79,9 @@ module.exports = async (req, res) => {
         mode: 'payment',
         customer_email: email,
         managed_payments: { enabled: false },
-        expires_at: Math.floor(Date.now() / 1000) + HOLD_MINUTES * 60,
+        // Expire alongside the underlying hold rather than a fresh 30 min,
+        // so we never accept a payment for a slot whose hold already lapsed.
+        expires_at: Math.floor(expiresAtMs / 1000),
         line_items: [
           {
             price_data: {
@@ -91,8 +99,6 @@ module.exports = async (req, res) => {
         cancel_url: `${SITE_URL}/book.html`,
       });
     } catch (err) {
-      // Stripe session creation failed — free up the slot we just held.
-      await releaseHold(bookingId).catch(() => {});
       throw err;
     }
 
