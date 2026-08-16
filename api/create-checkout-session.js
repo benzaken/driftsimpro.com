@@ -2,24 +2,17 @@ const Stripe = require('stripe');
 const { DateTime } = require('luxon');
 const crypto = require('crypto');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-const { reserveHold, releaseHold, VENUE_TIMEZONE } = require('../lib/store');
+const { reserveHold, releaseHold, updateBooking, VENUE_TIMEZONE } = require('../lib/store');
 
 const SITE_URL = 'https://driftsimpro.com';
-const HOLD_MINUTES = 30; // matches Stripe's minimum checkout session expiry
+// Longer than the old payment-only hold (30 min) since the customer now has
+// to get through ID verification *and* payment before the slot is released.
+const HOLD_MINUTES = 45;
 
-// Duration options, keyed by duration in minutes -> price in cents.
-// Both prorate at the $35/hr rate.
 const PRICE_TABLE = {
-  30: 1750, // 30 min — $17.50
-  60: 3500, // 1 hr — $35
+  30: 1750,
+  60: 3500,
 };
-
-function formatDuration(minutes) {
-  if (minutes % 60 === 0) {
-    return `${minutes / 60} hr`;
-  }
-  return `${minutes} min`;
-}
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', SITE_URL);
@@ -41,8 +34,7 @@ module.exports = async (req, res) => {
     }
 
     const minutes = parseInt(duration, 10);
-    const unitAmount = PRICE_TABLE[minutes];
-    if (!unitAmount) {
+    if (!PRICE_TABLE[minutes]) {
       return res.status(400).json({ error: 'Invalid duration' });
     }
 
@@ -58,6 +50,7 @@ module.exports = async (req, res) => {
       startAt: startAt.toJSDate(),
       endAt: endAt.toJSDate(),
       holdMinutes: HOLD_MINUTES,
+      meta: { date, time, duration: String(minutes), name, email },
     });
 
     if (!hold.ok) {
@@ -67,38 +60,34 @@ module.exports = async (req, res) => {
       return res.status(409).json({ error: message });
     }
 
-    let session;
+    let verificationSession;
     try {
-      session = await stripe.checkout.sessions.create({
-        mode: 'payment',
-        customer_email: email,
-        managed_payments: { enabled: false },
-        expires_at: Math.floor(Date.now() / 1000) + HOLD_MINUTES * 60,
-        line_items: [
-          {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: `Sim Drift session — ${formatDuration(minutes)} (${date} ${time})`,
-              },
-              unit_amount: unitAmount,
-            },
-            quantity: 1,
+      verificationSession = await stripe.identity.verificationSessions.create({
+        type: 'document',
+        metadata: { bookingId },
+        options: {
+          document: {
+            require_matching_selfie: true,
           },
-        ],
-        metadata: { date, time, duration: String(minutes), name, email, bookingId },
-        success_url: `${SITE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${SITE_URL}/book.html`,
+        },
+        // Stripe doesn't template this the way Checkout does, so we bake
+        // the bookingId in ourselves and look up the verification session
+        // id server-side (see api/verification-status.js).
+        return_url: `${SITE_URL}/verify-return.html?bookingId=${bookingId}`,
       });
     } catch (err) {
-      // Stripe session creation failed — free up the slot we just held.
       await releaseHold(bookingId).catch(() => {});
       throw err;
     }
 
-    return res.status(200).json({ url: session.url });
+    await updateBooking(bookingId, {
+      verificationSessionId: verificationSession.id,
+      verificationStatus: verificationSession.status, // 'requires_input'
+    });
+
+    return res.status(200).json({ url: verificationSession.url, bookingId });
   } catch (err) {
-    console.error('Checkout session error:', err);
-    return res.status(500).json({ error: 'Could not start checkout' });
+    console.error('Verification session error:', err);
+    return res.status(500).json({ error: 'Could not start identity verification' });
   }
 };
