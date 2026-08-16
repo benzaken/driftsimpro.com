@@ -1,7 +1,7 @@
 const Stripe = require('stripe');
 const { DateTime } = require('luxon');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-const { confirmBooking, releaseHold } = require('../lib/store');
+const { confirmBooking, releaseHold, updateBooking } = require('../lib/store');
 
 // The local time zone your booking times are entered in.
 const VENUE_TIMEZONE = 'America/New_York';
@@ -92,6 +92,51 @@ async function handler(req, res) {
         await releaseHold(session.metadata.bookingId);
       } catch (err) {
         console.error('Failed to release hold for expired session', session.id, err);
+      }
+    }
+  }
+
+  // Identity verification events — these keep booking.verificationStatus
+  // current so create-checkout-session can trust it without an extra
+  // round trip to Stripe, and so verify-return.html's polling picks up
+  // the result even if the customer's browser is what's slow, not us.
+  if (event.type === 'identity.verification_session.verified') {
+    const vs = event.data.object;
+    const bookingId = vs.metadata && vs.metadata.bookingId;
+    if (bookingId) {
+      try {
+        await updateBooking(bookingId, { verificationStatus: 'verified' });
+      } catch (err) {
+        console.error('Failed to mark booking verified', bookingId, err);
+      }
+    }
+  }
+
+  if (event.type === 'identity.verification_session.requires_input') {
+    // Fires both when verification is still pending input and when it has
+    // definitively failed — vs.last_error tells us which.
+    const vs = event.data.object;
+    const bookingId = vs.metadata && vs.metadata.bookingId;
+    if (bookingId) {
+      try {
+        await updateBooking(bookingId, {
+          verificationStatus: 'requires_input',
+          verificationError: vs.last_error ? vs.last_error.reason : null,
+        });
+      } catch (err) {
+        console.error('Failed to update booking verification status', bookingId, err);
+      }
+    }
+  }
+
+  if (event.type === 'identity.verification_session.canceled') {
+    const vs = event.data.object;
+    const bookingId = vs.metadata && vs.metadata.bookingId;
+    if (bookingId) {
+      try {
+        await releaseHold(bookingId);
+      } catch (err) {
+        console.error('Failed to release hold for canceled verification', bookingId, err);
       }
     }
   }
