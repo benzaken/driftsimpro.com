@@ -66,9 +66,9 @@
         <div class="summary-row"><span>Duration</span><span id="summary-duration">2 hr</span></div>
         <div class="summary-row"><span>Time</span><span id="summary-time">—</span></div>
         <div class="summary-row total"><span>Total</span><span id="summary-total">$70</span></div>
-        <button class="btn btn-primary btn-block" style="margin-top: 20px;" id="pay-btn">Continue to payment</button>
+        <button class="btn btn-primary btn-block" style="margin-top: 20px;" id="pay-btn">Verify ID &amp; pay</button>
         <div class="lock-note">
-          <strong>Automatic access:</strong> once payment is confirmed, you'll get a temporary door code that works only during your reserved session.
+          <strong>ID verification required:</strong> we use Stripe to confirm your identity before payment — have a photo ID ready. Once you're verified and paid, you'll get a temporary door code that works only during your reserved session.
         </div>
       </div>
 
@@ -249,10 +249,10 @@
     }
 
     payBtn.disabled = true;
-    payBtn.textContent = 'Redirecting to payment…';
+    payBtn.textContent = 'Starting ID verification…';
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/create-checkout-session`, {
+      const res = await fetch(`${BACKEND_URL}/api/create-verification-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date, time: selectedSlot, duration: String(minutes), name, email }),
@@ -262,9 +262,9 @@
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || 'Something went wrong starting checkout. Please try again.');
+        alert(data.error || 'Something went wrong starting identity verification. Please try again.');
         payBtn.disabled = false;
-        payBtn.textContent = 'Continue to payment';
+        payBtn.textContent = 'Verify ID & pay';
         if (res.status === 409) {
           loadSlots(); // slot got taken — refresh the grid
         }
@@ -272,7 +272,7 @@
     } catch (err) {
       alert('Could not reach the booking server. Please try again.');
       payBtn.disabled = false;
-      payBtn.textContent = 'Continue to payment';
+      payBtn.textContent = 'Verify ID & pay';
     }
   });
 </script>
