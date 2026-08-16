@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verifying Your ID | Sim Drift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style-wa.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="index.html" class="brand">SIM DRIFT</a>
+    <div class="nav-links">
+      <a href="rules.html">Rules</a>
+      <a href="faq.html">FAQ</a>
+      <a href="book.html" class="nav-book">Book Now</a>
+    </div>
+  </div>
+</nav>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="eyebrow" id="status-eyebrow">Checking your ID…</div>
+    <h1 id="status-title">One moment</h1>
+    <p class="lead" id="status-body">We're confirming your identity verification. This usually takes just a few seconds.</p>
+  </div>
+</section>
+
+<section class="section" style="border-top: none;">
+  <div class="wrap">
+    <div class="summary-card" id="retry-card" style="display: none; max-width: 480px;">
+      <button class="btn btn-primary btn-block" id="retry-btn">Try verification again</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="brand">SIM DRIFT</div>
+    <div class="foot-note">&copy; 2026 Sim Drift.</div>
+  </div>
+</footer>
+
+<script>
+  const BACKEND_URL = 'https://driftsimpro-com.vercel.app';
+
+  const params = new URLSearchParams(window.location.search);
+  const bookingId = params.get('bookingId');
+
+  const eyebrow = document.getElementById('status-eyebrow');
+  const title = document.getElementById('status-title');
+  const body = document.getElementById('status-body');
+  const retryCard = document.getElementById('retry-card');
+  const retryBtn = document.getElementById('retry-btn');
+
+  let attempts = 0;
+  const MAX_ATTEMPTS = 15; // ~30s of polling before we give up and show a retry option
+
+  function showFailure(message) {
+    eyebrow.textContent = 'Verification not complete';
+    title.textContent = 'We couldn\'t verify your ID';
+    body.textContent = message;
+    retryCard.style.display = 'block';
+  }
+
+  function goToPayment() {
+    eyebrow.textContent = 'ID verified';
+    title.textContent = 'Taking you to payment…';
+    body.textContent = 'Your identity is confirmed. Redirecting you to secure checkout.';
+
+    fetch(`${BACKEND_URL}/api/create-checkout-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingId }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          showFailure(data.error || 'Something went wrong starting checkout. Please start over from the booking page.');
+        }
+      })
+      .catch(() => showFailure('Could not reach the booking server. Please start over from the booking page.'));
+  }
+
+  function poll() {
+    fetch(`${BACKEND_URL}/api/verification-status?bookingId=${encodeURIComponent(bookingId)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.status === 'verified') {
+          goToPayment();
+          return;
+        }
+        if (data.status === 'canceled') {
+          showFailure('Verification was canceled. Please start over from the booking page.');
+          return;
+        }
+        if (attempts >= MAX_ATTEMPTS) {
+          showFailure('This is taking longer than expected. You can try again below, or contact us if it keeps happening.');
+          return;
+        }
+        attempts += 1;
+        setTimeout(poll, 2000);
+      })
+      .catch(() => showFailure('Could not reach the booking server. Please start over from the booking page.'));
+  }
+
+  retryBtn.addEventListener('click', () => {
+    window.location.href = 'book.html';
+  });
+
+  if (!bookingId) {
+    showFailure('We couldn\'t find your booking. Please start over from the booking page.');
+  } else {
+    poll();
+  }
+</script>
+
+</body>
+</html>
